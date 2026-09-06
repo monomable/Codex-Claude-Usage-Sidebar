@@ -1,0 +1,27 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+
+# Archives and build output
+*.zip
+dist/
+build/
+release/
+
+# Local/debug files
+*.log
+debug/
+screenshots/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
