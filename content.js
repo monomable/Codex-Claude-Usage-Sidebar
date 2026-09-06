@@ -343,22 +343,43 @@
     const card = document.createElement('section');
     card.id = CARD_ID;
     card.setAttribute('aria-label', `${PROVIDER_NAME} 사용량`);
-    card.innerHTML = `
-      <div class="cus-header">
-        <div class="cus-title-wrap">
-          <span class="cus-dot loading" data-role="dot"></span>
-          <span class="cus-title">${PROVIDER_NAME} 사용량</span>
-        </div>
-        <button type="button" class="cus-refresh" data-role="refresh" title="지금 갱신" aria-label="지금 갱신">↻</button>
-      </div>
-      <div data-role="body"><div class="cus-message">사용량을 불러오는 중…</div></div>
-      <div class="cus-footer">
-        <span data-role="plan">${PROVIDER_NAME}</span>
-        <span data-role="updated">5분마다 자동 갱신</span>
-      </div>
-    `;
 
-    card.querySelector('[data-role="refresh"]')?.addEventListener('click', () => refreshUsage(true));
+    const header = document.createElement('div');
+    header.className = 'cus-header';
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'cus-title-wrap';
+    const dot = document.createElement('span');
+    dot.className = 'cus-dot loading';
+    dot.dataset.role = 'dot';
+    const title = document.createElement('span');
+    title.className = 'cus-title';
+    title.textContent = `${PROVIDER_NAME} 사용량`;
+    titleWrap.append(dot, title);
+    const refresh = document.createElement('button');
+    refresh.type = 'button';
+    refresh.className = 'cus-refresh';
+    refresh.dataset.role = 'refresh';
+    refresh.title = '지금 갱신';
+    refresh.setAttribute('aria-label', '지금 갱신');
+    refresh.textContent = '↻';
+    refresh.addEventListener('click', () => refreshUsage(true));
+    header.append(titleWrap, refresh);
+
+    const body = document.createElement('div');
+    body.dataset.role = 'body';
+    body.append(createMessage('사용량을 불러오는 중…'));
+
+    const footer = document.createElement('div');
+    footer.className = 'cus-footer';
+    const plan = document.createElement('span');
+    plan.dataset.role = 'plan';
+    plan.textContent = PROVIDER_NAME;
+    const updated = document.createElement('span');
+    updated.dataset.role = 'updated';
+    updated.textContent = '5분마다 자동 갱신';
+    footer.append(plan, updated);
+
+    card.append(header, body, footer);
     return card;
   }
 
@@ -393,21 +414,39 @@
     return card;
   }
 
-  function rowHtml(windowData, index) {
+  function createMessage(message, isError = false) {
+    const element = document.createElement('div');
+    element.className = `cus-message${isError ? ' error' : ''}`;
+    element.textContent = message;
+    return element;
+  }
+
+  function createUsageRow(windowData, index) {
     const label = labelForWindow(windowData, index);
     const left = Math.round(windowData.remainingPercent * 10) / 10;
-    return `
-      <div class="cus-row">
-        <div class="cus-row-top">
-          <span class="cus-label">${label}</span>
-          <span class="cus-percent">${left}% 남음</span>
-        </div>
-        <div class="cus-track" aria-label="${label} ${left}% 남음">
-          <div class="cus-bar" style="width:${left}%"></div>
-        </div>
-        <div class="cus-reset">${formatReset(windowData.resetAt)}</div>
-      </div>
-    `;
+    const row = document.createElement('div');
+    row.className = 'cus-row';
+    const rowTop = document.createElement('div');
+    rowTop.className = 'cus-row-top';
+    const labelElement = document.createElement('span');
+    labelElement.className = 'cus-label';
+    labelElement.textContent = label;
+    const percent = document.createElement('span');
+    percent.className = 'cus-percent';
+    percent.textContent = `${left}% 남음`;
+    rowTop.append(labelElement, percent);
+    const track = document.createElement('div');
+    track.className = 'cus-track';
+    track.setAttribute('aria-label', `${label} ${left}% 남음`);
+    const bar = document.createElement('div');
+    bar.className = 'cus-bar';
+    bar.style.width = `${left}%`;
+    track.append(bar);
+    const reset = document.createElement('div');
+    reset.className = 'cus-reset';
+    reset.textContent = formatReset(windowData.resetAt);
+    row.append(rowTop, track, reset);
+    return row;
   }
 
   function render() {
@@ -424,9 +463,11 @@
     if (dot) dot.className = `cus-dot${inFlight ? ' loading' : lastError && !lastUsage ? ' error' : ''}`;
 
     if (lastUsage) {
-      body.innerHTML = lastUsage.windows.map(rowHtml).join('');
+      body.replaceChildren(...lastUsage.windows.map(createUsageRow));
       if (lastUsage.limitReached) {
-        body.insertAdjacentHTML('beforeend', `<div class="cus-message error" style="margin-top:7px">현재 ${PROVIDER_NAME} 사용 한도에 도달했습니다.</div>`);
+        const limitMessage = createMessage(`현재 ${PROVIDER_NAME} 사용 한도에 도달했습니다.`, true);
+        limitMessage.style.marginTop = '7px';
+        body.append(limitMessage);
       }
 
       if (plan) {
@@ -439,11 +480,11 @@
       }
       if (updated) updated.textContent = `${formatUpdated(lastUpdatedAt)} 갱신`;
     } else if (lastError) {
-      body.innerHTML = `<div class="cus-message error">${lastError}</div>`;
+      body.replaceChildren(createMessage(lastError, true));
       if (plan) plan.textContent = PROVIDER_NAME;
       if (updated) updated.textContent = '↻ 버튼으로 재시도';
     } else {
-      body.innerHTML = '<div class="cus-message">사용량을 불러오는 중…</div>';
+      body.replaceChildren(createMessage('사용량을 불러오는 중…'));
       if (updated) updated.textContent = '5분마다 자동 갱신';
     }
   }

@@ -89,6 +89,7 @@ manifest.json   Firefox extension configuration and permissions
 background.js   Periodic refresh alarm and tab messaging
 content.js      Usage requests, normalization, caching, and sidebar injection
 content.css     Usage card layout and theme styles
+icons/          Extension icons for Firefox and high-resolution displays
 PRIVACY.md      Privacy policy
 README.md       Project documentation
 ```
