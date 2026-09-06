@@ -32,7 +32,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "codex-usage-sidebar@local",
+      "id": "{0acad74d-1e5b-48be-8dd7-2873ff9b5b01}",
       "data_collection_permissions": {
         "required": ["none"]
       },
