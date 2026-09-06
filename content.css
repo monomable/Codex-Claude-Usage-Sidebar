@@ -1,6 +1,5 @@
 #codex-usage-sidebar-card,
 #claude-usage-sidebar-card {
-  --cus-border: color-mix(in srgb, currentColor 14%, transparent);
   --cus-muted: color-mix(in srgb, currentColor 62%, transparent);
   --cus-track: color-mix(in srgb, currentColor 10%, transparent);
   --cus-fill: currentColor;
@@ -8,7 +7,6 @@
   width: calc(100% - 16px);
   margin: 6px 8px 10px 8px;
   padding: 10px 10px 9px;
-  border: 1px solid var(--cus-border);
   border-radius: 12px;
   color: inherit;
   background: color-mix(in srgb, Canvas 90%, transparent);
@@ -17,6 +15,10 @@
   line-height: 1.35;
   flex: 0 0 auto;
   z-index: 2;
+}
+
+#claude-usage-sidebar-card {
+  --cus-fill: #d97757;
 }
 
 #codex-usage-sidebar-card *,
@@ -117,7 +119,6 @@
 .cus-footer {
   margin-top: 8px;
   padding-top: 7px;
-  border-top: 1px solid var(--cus-border);
   display: flex;
   justify-content: space-between;
   gap: 8px;
