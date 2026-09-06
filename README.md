@@ -8,6 +8,17 @@ This extension displays the remaining usage quota for ChatGPT/Codex and Claude. 
 
 ## Installation
 
+### Chrome
+
+1. Download or clone this repository.
+2. Open `chrome://extensions` in Chrome.
+3. Enable **Developer mode**.
+4. Click **Load unpacked**.
+5. Select the project folder.
+6. Refresh any open `chatgpt.com` and `claude.ai` tabs.
+
+Chrome loads `manifest_chrome.json` rather than the Firefox `manifest.json`. Since Chrome expects the standard Manifest V3 service worker format, rename a copy of `manifest_chrome.json` to `manifest.json` in a separate folder before selecting **Load unpacked**, or package the Chrome manifest as the root manifest for distribution.
+
 ### Firefox
 
 1. Download or clone this repository.
@@ -16,7 +27,7 @@ This extension displays the remaining usage quota for ChatGPT/Codex and Claude. 
 4. Select the `manifest.json` file in the project folder.
 5. Refresh any open `chatgpt.com` and `claude.ai` tabs.
 
-This project is currently intended for Firefox temporary installation. There is no packaged store release yet.
+Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design. There is no packaged store release yet.
 
 ## Features
 
@@ -86,6 +97,7 @@ The extension uses the following permissions:
 
 ```text
 manifest.json   Firefox extension configuration and permissions
+manifest_chrome.json  Chrome Manifest V3 configuration
 background.js   Periodic refresh alarm and tab messaging
 content.js      Usage requests, normalization, caching, and sidebar injection
 content.css     Usage card layout and theme styles
