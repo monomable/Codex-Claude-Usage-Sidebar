@@ -1,12 +1,42 @@
 # Codex + Claude Usage Sidebar
 
+<p align="center">
+  <img src="assets/icons/icon-128.png" alt="Codex + Claude Usage Sidebar logo" width="128">
+</p>
+
 Monitor your Codex and Claude usage limits directly inside the left sidebar of their web applications with this Firefox extension.
 
 ## Overview
 
 This extension displays the remaining usage quota for ChatGPT/Codex and Claude. It shows the current 5-hour and weekly limits, remaining percentages, reset times, and available plan information without requiring a separate API key or external service.
 
+The interface automatically follows the browser language for **Korean, English, Japanese, and Chinese**. Other languages currently fall back to English.
+
+## At a Glance
+
+The extension adds a compact usage card to the service's existing left sidebar, so you can check your remaining quota without leaving the page. It shows the current 5-hour and weekly usage, remaining percentage, progress bar, reset time, plan, and last refresh time.
+
+### ChatGPT / Codex
+
+The usage card appears below the main navigation and displays both short-term and weekly limits at a glance.
+
+<p align="center">
+  <img src="docs/images/Chatgpt_usage.png" alt="ChatGPT Codex usage card in the sidebar" width="640">
+</p>
+
+### Claude
+
+The same sidebar card is available in Claude, with the layout and colors adapted to the service's interface.
+
+<p align="center">
+  <img src="docs/images/Claude_usage.png" alt="Claude usage card in the sidebar" width="640">
+</p>
+
 ## Installation
+
+The extension is now available on the [Chrome Web Store](https://chromewebstore.google.com/detail/icpbapmfmakbedeojcgnphifanmabiei?utm_source=item-share-cb).
+
+The Firefox version is currently pending review on Mozilla Add-ons.
 
 ### Chrome
 
@@ -27,7 +57,7 @@ Chrome loads `manifest_chrome.json` rather than the Firefox `manifest.json`. Sin
 4. Select the `manifest.json` file in the project folder.
 5. Refresh any open `chatgpt.com` and `claude.ai` tabs.
 
-Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design. There is no packaged store release yet.
+Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design. The Chrome version is available through the Chrome Web Store, while the Firefox version is currently pending review on Mozilla Add-ons.
 
 ## Features
 
@@ -44,6 +74,10 @@ The extension tracks usage from the supported web applications:
 - **Theme support** - Follows the site's light or dark appearance
 
 The usage card is placed near the conversation sections in each site's left sidebar. On ChatGPT/Codex it is placed above `Pinned`/`고정됨` when possible. On Claude it is placed above `Pinned`, `Recents`, or `Chats` when those headings are available.
+
+## Roadmap
+
+- **Google Gemini support** - Planned for a future release.
 
 ## How It Works
 
@@ -74,7 +108,7 @@ The extension runs locally in Firefox and uses your existing login session on `c
 - The extension does not use Firebase, analytics, or third-party tracking.
 - The Claude prepaid credits endpoint is not requested, and payment information is not accessed.
 
-For more details, see the [privacy policy](PRIVACY.md).
+For more details, see the [privacy policy](docs/PRIVACY.md).
 
 ## Permissions
 
@@ -98,10 +132,11 @@ The extension uses the following permissions:
 ```text
 manifest.json   Firefox extension configuration and permissions
 manifest_chrome.json  Chrome Manifest V3 configuration
+manifest_firefox.json  Firefox manifest copy for packaging
 background.js   Periodic refresh alarm and tab messaging
 content.js      Usage requests, normalization, caching, and sidebar injection
 content.css     Usage card layout and theme styles
-icons/          Extension icons for Firefox and high-resolution displays
-PRIVACY.md      Privacy policy
+assets/icons/   Extension icons for Firefox and high-resolution displays
+docs/PRIVACY.md Privacy policy
 README.md       Project documentation
 ```

@@ -11,6 +11,68 @@
   const CODEX_USAGE_PATHS = ['/backend-api/wham/usage', '/api/codex/usage'];
   const CACHE_USAGE_KEY = `${PROVIDER}UsageSnapshot`;
   const CACHE_UPDATED_KEY = `${PROVIDER}UsageUpdatedAt`;
+  const UI_LOCALE = (() => {
+    const language = (navigator.language || 'en').toLowerCase();
+    if (language.startsWith('ko')) return 'ko';
+    if (language.startsWith('ja')) return 'ja';
+    if (language.startsWith('zh')) return 'zh';
+    return 'en';
+  })();
+  const UI_TEXT = {
+    ko: {
+      usage: '사용량', loading: '사용량을 불러오는 중…', refresh: '지금 갱신', autoRefresh: '5분마다 자동 갱신',
+      fiveHour: '5시간', weekly: '주간', daily: '24시간', days: '일', hours: '시간', minutes: '분', after: '후',
+      remaining: (value) => `${value}% 남음`, resetUnavailable: '리셋 시간 정보 없음', notUpdated: '아직 갱신 안 됨',
+      updated: '갱신', retry: '↻ 버튼으로 재시도', limitReached: (name) => `현재 ${name} 사용 한도에 도달했습니다.`,
+      loginRequired: (name, status) => `${name} 로그인이 필요합니다 (HTTP ${status}).`,
+      accessDenied: (name, status) => `현재 계정에서 ${name} 사용량 조회가 거부되었습니다 (HTTP ${status}).`,
+      requestFailed: (name, status) => `${name} 사용량 조회 실패 (HTTP ${status}).`,
+      requestFailedWithMessage: (name, message) => `${name} 사용량 조회 실패: ${message}`,
+      unknownError: '알 수 없는 오류', responseFormat: '사용량 응답 형식을 해석하지 못했습니다.',
+      organizationNotFound: 'Claude 채팅 조직을 찾지 못했습니다.', plan: '플랜', organization: '조직'
+    },
+    en: {
+      usage: 'Usage', loading: 'Loading usage…', refresh: 'Refresh now', autoRefresh: 'Auto-refreshes every 5 minutes',
+      fiveHour: '5 hours', weekly: 'Weekly', daily: '24 hours', days: 'days', hours: 'hours', minutes: 'minutes', after: 'from now',
+      remaining: (value) => `${value}% remaining`, resetUnavailable: 'Reset time unavailable', notUpdated: 'Not updated yet',
+      updated: 'updated', retry: '↻ Click to retry', limitReached: (name) => `The ${name} usage limit has been reached.`,
+      loginRequired: (name, status) => `${name} login is required (HTTP ${status}).`,
+      accessDenied: (name, status) => `Usage access for ${name} was denied (HTTP ${status}).`,
+      requestFailed: (name, status) => `${name} usage request failed (HTTP ${status}).`,
+      requestFailedWithMessage: (name, message) => `${name} usage request failed: ${message}`,
+      unknownError: 'unknown error', responseFormat: 'The usage response format could not be interpreted.',
+      organizationNotFound: 'No Claude chat organization was found.', plan: 'Plan', organization: 'Organization'
+    },
+    ja: {
+      usage: '使用量', loading: '使用量を読み込み中…', refresh: '今すぐ更新', autoRefresh: '5分ごとに自動更新',
+      fiveHour: '5時間', weekly: '週間', daily: '24時間', days: '日', hours: '時間', minutes: '分', after: '後',
+      remaining: (value) => `残り ${value}%`, resetUnavailable: 'リセット時刻情報なし', notUpdated: '未更新',
+      updated: '更新', retry: '↻ クリックして再試行', limitReached: (name) => `${name}の使用上限に達しました。`,
+      loginRequired: (name, status) => `${name}へのログインが必要です (HTTP ${status})。`,
+      accessDenied: (name, status) => `現在のアカウントでは${name}の使用量を取得できません (HTTP ${status})。`,
+      requestFailed: (name, status) => `${name}の使用量取得に失敗しました (HTTP ${status})。`,
+      requestFailedWithMessage: (name, message) => `${name}の使用量取得に失敗しました: ${message}`,
+      unknownError: '不明なエラー', responseFormat: '使用量の応答形式を解釈できませんでした。',
+      organizationNotFound: 'Claudeのチャット組織が見つかりません。', plan: 'プラン', organization: '組織'
+    },
+    zh: {
+      usage: '用量', loading: '正在加载用量…', refresh: '立即刷新', autoRefresh: '每 5 分钟自动刷新',
+      fiveHour: '5 小时', weekly: '每周', daily: '24 小时', days: '天', hours: '小时', minutes: '分钟', after: '后',
+      remaining: (value) => `剩余 ${value}%`, resetUnavailable: '没有重置时间信息', notUpdated: '尚未更新',
+      updated: '已更新', retry: '↻ 点击重试', limitReached: (name) => `已达到 ${name} 使用上限。`,
+      loginRequired: (name, status) => `需要登录 ${name} (HTTP ${status})。`,
+      accessDenied: (name, status) => `当前账号无法获取 ${name} 用量 (HTTP ${status})。`,
+      requestFailed: (name, status) => `${name} 用量获取失败 (HTTP ${status})。`,
+      requestFailedWithMessage: (name, message) => `${name} 用量获取失败：${message}`,
+      unknownError: '未知错误', responseFormat: '无法解析用量响应格式。',
+      organizationNotFound: '未找到 Claude 聊天组织。', plan: '套餐', organization: '组织'
+    }
+  };
+  const text = (key, ...args) => {
+    const value = UI_TEXT[UI_LOCALE][key];
+    return typeof value === 'function' ? value(...args) : value;
+  };
+  const localeForDate = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' }[UI_LOCALE];
 
   let inFlight = false;
   let refreshTimer = null;
@@ -88,8 +150,8 @@
     const secondaryRaw = rate.weekly || rate.secondary_window || rate.secondary || null;
 
     const windows = [
-      normalizeCodexWindow(primaryRaw, '5시간'),
-      normalizeCodexWindow(secondaryRaw, '주간')
+      normalizeCodexWindow(primaryRaw, text('fiveHour')),
+      normalizeCodexWindow(secondaryRaw, text('weekly'))
     ].filter(Boolean);
 
     if (!windows.length) return null;
@@ -141,8 +203,8 @@
     const type = String(org?.organization_type || org?.type || '').toLowerCase();
     const combined = `${joined} ${type}`;
 
-    if (/enterprise/.test(combined)) return 'Claude Enterprise';
-    if (/team/.test(combined)) return 'Claude Team';
+    if (/enterprise/.test(combined)) return `Claude Enterprise`;
+    if (/team/.test(combined)) return `Claude Team`;
     if (/claude_max|max/.test(combined)) return 'Claude Max';
     if (/claude_pro|pro/.test(combined)) return 'Claude Pro';
     return 'Claude';
@@ -157,8 +219,8 @@
     const sevenRaw = raw.seven_day || findClaudeLimitFromArray(raw, 'seven');
 
     const windows = [
-      normalizeClaudeWindow(fiveRaw, '5시간', 18_000),
-      normalizeClaudeWindow(sevenRaw, '주간', 604_800)
+      normalizeClaudeWindow(fiveRaw, text('fiveHour'), 18_000),
+      normalizeClaudeWindow(sevenRaw, text('weekly'), 604_800)
     ].filter(Boolean);
 
     if (!windows.length) return null;
@@ -180,17 +242,17 @@
     if (windowData.fallbackName) return windowData.fallbackName;
     const seconds = windowData.durationSeconds;
     if (seconds) {
-      if (Math.abs(seconds - 18_000) <= 120) return '5시간';
-      if (Math.abs(seconds - 604_800) <= 600) return '주간';
-      if (Math.abs(seconds - 86_400) <= 120) return '24시간';
-      if (seconds >= 86_400 && seconds % 86_400 === 0) return `${Math.round(seconds / 86_400)}일`;
-      if (seconds >= 3600 && seconds % 3600 === 0) return `${Math.round(seconds / 3600)}시간`;
+      if (Math.abs(seconds - 18_000) <= 120) return text('fiveHour');
+      if (Math.abs(seconds - 604_800) <= 600) return text('weekly');
+      if (Math.abs(seconds - 86_400) <= 120) return text('daily');
+      if (seconds >= 86_400 && seconds % 86_400 === 0) return `${Math.round(seconds / 86_400)}${text('days')}`;
+      if (seconds >= 3600 && seconds % 3600 === 0) return `${Math.round(seconds / 3600)}${text('hours')}`;
     }
-    return index === 0 ? '사용 한도 1' : '사용 한도 2';
+    return index === 0 ? `${text('usage')} 1` : `${text('usage')} 2`;
   }
 
   function formatReset(resetAt) {
-    if (!resetAt) return '리셋 시간 정보 없음';
+    if (!resetAt) return text('resetUnavailable');
     const now = Date.now();
     const diff = Math.max(0, resetAt - now);
     const totalMinutes = Math.ceil(diff / 60000);
@@ -199,11 +261,23 @@
     const minutes = totalMinutes % 60;
 
     let relative = '';
-    if (days > 0) relative = `${days}일 ${hours}시간 후`;
+    if (UI_LOCALE === 'en') {
+      if (days > 0) relative = `${days}d ${hours}h ${text('after')}`;
+      else if (hours > 0) relative = `${hours}h ${minutes}m ${text('after')}`;
+      else relative = `${minutes}m ${text('after')}`;
+    } else if (UI_LOCALE === 'zh') {
+      if (days > 0) relative = `${days}天${hours}小时后`;
+      else if (hours > 0) relative = `${hours}小时${minutes}分钟后`;
+      else relative = `${minutes}分钟后`;
+    } else if (UI_LOCALE === 'ja') {
+      if (days > 0) relative = `${days}日${hours}時間後`;
+      else if (hours > 0) relative = `${hours}時間${minutes}分後`;
+      else relative = `${minutes}分後`;
+    } else if (days > 0) relative = `${days}일 ${hours}시간 후`;
     else if (hours > 0) relative = `${hours}시간 ${minutes}분 후`;
     else relative = `${minutes}분 후`;
 
-    const absolute = new Intl.DateTimeFormat('ko-KR', {
+    const absolute = new Intl.DateTimeFormat(localeForDate, {
       month: 'numeric',
       day: 'numeric',
       hour: '2-digit',
@@ -214,8 +288,8 @@
   }
 
   function formatUpdated(ts) {
-    if (!ts) return '아직 갱신 안 됨';
-    return new Intl.DateTimeFormat('ko-KR', {
+    if (!ts) return text('notUpdated');
+    return new Intl.DateTimeFormat(localeForDate, {
       hour: '2-digit',
       minute: '2-digit'
     }).format(new Date(ts));
@@ -246,10 +320,10 @@
         const links = [...el.querySelectorAll('a[href]')];
 
         if (IS_CLAUDE) {
-          if (/Claude|최근|Recents?|Chats?|대화|Projects?|프로젝트|Pinned|고정됨/i.test(text)) score += 5;
+          if (/Claude|최근|Recents?|Chats?|대화|Projects?|프로젝트|Pinned|고정됨|ピン留め|最近|チャット|プロジェクト|固定|聊天|项目/i.test(text)) score += 5;
           score += Math.min(6, links.filter((a) => /\/chat\/|\/project\//.test(a.getAttribute('href') || '')).length);
         } else {
-          if (/대화|채팅|Chats|Projects|프로젝트|Codex|Tasks|작업|Pinned|고정됨/i.test(text)) score += 5;
+          if (/대화|채팅|Chats|Projects|프로젝트|Codex|Tasks|작업|Pinned|고정됨|チャット|プロジェクト|タスク|ピン留め|聊天|项目|任务|固定/i.test(text)) score += 5;
           score += Math.min(6, links.filter((a) => /\/c\/|\/codex|\/g\//.test(a.getAttribute('href') || '')).length);
         }
 
@@ -314,14 +388,14 @@
       if (IS_CLAUDE) {
         // Claude: place it immediately above the conversation list heading when possible.
         const labelled = mountBeforeLabel(sidebar, [
-          /^(Pinned|고정됨)$/i,
-          /^(Recents?|최근|최근 대화)$/i,
-          /^(Chats?|대화|대화 기록|Conversations?)$/i
+          /^(Pinned|고정됨|ピン留め|固定)$/i,
+          /^(Recents?|최근|최근 대화|最近)$/i,
+          /^(Chats?|대화|대화 기록|Conversations?|チャット|聊天)$/i,
         ]);
         if (labelled) return labelled;
       } else {
         // ChatGPT/Codex: keep the v1.0.1 behavior — directly above Pinned/고정됨.
-        const pinned = mountBeforeLabel(sidebar, [/^(Pinned|고정됨)$/i]);
+        const pinned = mountBeforeLabel(sidebar, [/^(Pinned|고정됨|ピン留め|固定)$/i]);
         if (pinned) return pinned;
       }
 
@@ -342,7 +416,7 @@
   function createCard() {
     const card = document.createElement('section');
     card.id = CARD_ID;
-    card.setAttribute('aria-label', `${PROVIDER_NAME} 사용량`);
+    card.setAttribute('aria-label', `${PROVIDER_NAME} ${text('usage')}`);
 
     const header = document.createElement('div');
     header.className = 'cus-header';
@@ -353,21 +427,21 @@
     dot.dataset.role = 'dot';
     const title = document.createElement('span');
     title.className = 'cus-title';
-    title.textContent = `${PROVIDER_NAME} 사용량`;
+    title.textContent = `${PROVIDER_NAME} ${text('usage')}`;
     titleWrap.append(dot, title);
     const refresh = document.createElement('button');
     refresh.type = 'button';
     refresh.className = 'cus-refresh';
     refresh.dataset.role = 'refresh';
-    refresh.title = '지금 갱신';
-    refresh.setAttribute('aria-label', '지금 갱신');
+    refresh.title = text('refresh');
+    refresh.setAttribute('aria-label', text('refresh'));
     refresh.textContent = '↻';
     refresh.addEventListener('click', () => refreshUsage(true));
     header.append(titleWrap, refresh);
 
     const body = document.createElement('div');
     body.dataset.role = 'body';
-    body.append(createMessage('사용량을 불러오는 중…'));
+    body.append(createMessage(text('loading')));
 
     const footer = document.createElement('div');
     footer.className = 'cus-footer';
@@ -376,7 +450,7 @@
     plan.textContent = PROVIDER_NAME;
     const updated = document.createElement('span');
     updated.dataset.role = 'updated';
-    updated.textContent = '5분마다 자동 갱신';
+    updated.textContent = text('autoRefresh');
     footer.append(plan, updated);
 
     card.append(header, body, footer);
@@ -433,11 +507,11 @@
     labelElement.textContent = label;
     const percent = document.createElement('span');
     percent.className = 'cus-percent';
-    percent.textContent = `${left}% 남음`;
+    percent.textContent = text('remaining', left);
     rowTop.append(labelElement, percent);
     const track = document.createElement('div');
     track.className = 'cus-track';
-    track.setAttribute('aria-label', `${label} ${left}% 남음`);
+    track.setAttribute('aria-label', `${label} ${text('remaining', left)}`);
     const bar = document.createElement('div');
     bar.className = 'cus-bar';
     bar.style.width = `${left}%`;
@@ -465,7 +539,7 @@
     if (lastUsage) {
       body.replaceChildren(...lastUsage.windows.map(createUsageRow));
       if (lastUsage.limitReached) {
-        const limitMessage = createMessage(`현재 ${PROVIDER_NAME} 사용 한도에 도달했습니다.`, true);
+        const limitMessage = createMessage(text('limitReached', PROVIDER_NAME), true);
         limitMessage.style.marginTop = '7px';
         body.append(limitMessage);
       }
@@ -475,17 +549,17 @@
           plan.textContent = lastUsage.planType || 'Claude';
           if (lastUsage.organizationName) plan.title = lastUsage.organizationName;
         } else {
-          plan.textContent = lastUsage.planType ? `Plan: ${lastUsage.planType}` : 'Codex';
+          plan.textContent = lastUsage.planType ? `${text('plan')}: ${lastUsage.planType}` : 'Codex';
         }
       }
-      if (updated) updated.textContent = `${formatUpdated(lastUpdatedAt)} 갱신`;
+      if (updated) updated.textContent = `${formatUpdated(lastUpdatedAt)} ${text('updated')}`;
     } else if (lastError) {
       body.replaceChildren(createMessage(lastError, true));
       if (plan) plan.textContent = PROVIDER_NAME;
-      if (updated) updated.textContent = '↻ 버튼으로 재시도';
+      if (updated) updated.textContent = text('retry');
     } else {
-      body.replaceChildren(createMessage('사용량을 불러오는 중…'));
-      if (updated) updated.textContent = '5분마다 자동 갱신';
+      body.replaceChildren(createMessage(text('loading')));
+      if (updated) updated.textContent = text('autoRefresh');
     }
   }
 
@@ -576,7 +650,7 @@
     const orgRaw = await fetchJson('/api/organizations');
     const organizations = normalizeOrganizations(orgRaw);
     if (!organizations.length) {
-      const err = new Error('Claude 조직을 찾지 못했습니다.');
+      const err = new Error(text('organizationNotFound'));
       err.status = 404;
       throw err;
     }
@@ -621,7 +695,7 @@
     try {
       const raw = await fetchUsage();
       const normalized = normalizeUsage(raw);
-      if (!normalized) throw new Error('사용량 응답 형식을 해석하지 못했습니다.');
+      if (!normalized) throw new Error(text('responseFormat'));
       lastUsage = normalized;
       lastUpdatedAt = Date.now();
       lastError = null;
@@ -637,15 +711,15 @@
     } catch (error) {
       const status = error?.status;
       if (status === 401) {
-        lastError = `${PROVIDER_NAME} 로그인이 필요합니다 (HTTP 401).`;
+        lastError = text('loginRequired', PROVIDER_NAME, status);
       } else if (status === 403) {
-        lastError = `현재 계정에서 ${PROVIDER_NAME} 사용량 조회가 거부되었습니다 (HTTP 403).`;
-      } else if (status === 404 && IS_CLAUDE && /조직/.test(error?.message || '')) {
-        lastError = 'Claude 채팅 조직을 찾지 못했습니다.';
+        lastError = text('accessDenied', PROVIDER_NAME, status);
+      } else if (status === 404 && IS_CLAUDE && error?.message === text('organizationNotFound')) {
+        lastError = text('organizationNotFound');
       } else if (status) {
-        lastError = `${PROVIDER_NAME} 사용량 조회 실패 (HTTP ${status}).`;
+        lastError = text('requestFailed', PROVIDER_NAME, status);
       } else {
-        lastError = `${PROVIDER_NAME} 사용량 조회 실패: ${error?.message || '알 수 없는 오류'}`;
+        lastError = text('requestFailedWithMessage', PROVIDER_NAME, error?.message || text('unknownError'));
       }
       if (manual) console.warn(`[${PROVIDER_NAME} Usage Sidebar]`, error);
     } finally {
