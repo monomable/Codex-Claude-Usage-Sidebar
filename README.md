@@ -34,30 +34,12 @@ The same sidebar card is available in Claude, with the layout and colors adapted
 
 ## Installation
 
-The extension is now available on the [Chrome Web Store](https://chromewebstore.google.com/detail/icpbapmfmakbedeojcgnphifanmabiei?utm_source=item-share-cb).
+Install the extension from the official browser stores:
 
-The Firefox version is currently pending review on Mozilla Add-ons.
+- [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/icpbapmfmakbedeojcgnphifanmabiei?utm_source=item-share-cb)
+- [Install from Mozilla Add-ons for Firefox](https://addons.mozilla.org/ko/firefox/addon/codex-claude-usage-sidebar/)
 
-### Chrome
-
-1. Download or clone this repository.
-2. Open `chrome://extensions` in Chrome.
-3. Enable **Developer mode**.
-4. Click **Load unpacked**.
-5. Select the project folder.
-6. Refresh any open `chatgpt.com` and `claude.ai` tabs.
-
-Chrome loads `manifest_chrome.json` rather than the Firefox `manifest.json`. Since Chrome expects the standard Manifest V3 service worker format, rename a copy of `manifest_chrome.json` to `manifest.json` in a separate folder before selecting **Load unpacked**, or package the Chrome manifest as the root manifest for distribution.
-
-### Firefox
-
-1. Download or clone this repository.
-2. Open `about:debugging#/runtime/this-firefox` in Firefox.
-3. Click **Load Temporary Add-on...**.
-4. Select the `manifest.json` file in the project folder.
-5. Refresh any open `chatgpt.com` and `claude.ai` tabs.
-
-Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design. The Chrome version is available through the Chrome Web Store, while the Firefox version is currently pending review on Mozilla Add-ons.
+Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design.
 
 ## Features
 
