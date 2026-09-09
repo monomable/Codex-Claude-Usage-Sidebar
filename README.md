@@ -12,6 +12,15 @@ This extension displays the remaining usage quota for ChatGPT/Codex and Claude. 
 
 The interface automatically follows the browser language for **Korean, English, Japanese, and Chinese**. Other languages currently fall back to English.
 
+## Installation
+
+Install the extension from the official browser stores:
+
+- [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/icpbapmfmakbedeojcgnphifanmabiei?utm_source=item-share-cb)
+- [Install from Mozilla Add-ons for Firefox](https://addons.mozilla.org/ko/firefox/addon/codex-claude-usage-sidebar/)
+
+Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design.
+
 ## At a Glance
 
 The extension adds a compact usage card to the service's existing left sidebar, so you can check your remaining quota without leaving the page. It shows the current 5-hour and weekly usage, remaining percentage, progress bar, reset time, plan, and last refresh time.
@@ -31,15 +40,6 @@ The same sidebar card is available in Claude, with the layout and colors adapted
 <p align="center">
   <img src="docs/images/Claude_usage.png" alt="Claude usage card in the sidebar" width="640">
 </p>
-
-## Installation
-
-Install the extension from the official browser stores:
-
-- [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/icpbapmfmakbedeojcgnphifanmabiei?utm_source=item-share-cb)
-- [Install from Mozilla Add-ons for Firefox](https://addons.mozilla.org/ko/firefox/addon/codex-claude-usage-sidebar/)
-
-Both browser versions share the same content script, stylesheet, usage normalization, and sidebar design.
 
 ## Features
 
